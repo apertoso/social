@@ -16,6 +16,7 @@
     "depends": [
         "decimal_precision",
         "mail",
+        "mass_mailing",
     ],
     "data": [
         "data/tracking_data.xml",
