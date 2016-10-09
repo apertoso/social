@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import email.message
 import logging
 import re
 
@@ -9,6 +10,17 @@ from openerp.addons.mail.models.mail_thread import decode_header
 from openerp import models, api
 
 _logger = logging.getLogger(__name__)
+
+
+def message_get_contents(message):
+    if type(message) is not email.message:
+        return message
+    # else
+    if message.is_multipart():
+        return "\n".join(
+            [message_get_contents(m) for m in message.get_payload()])
+    else:
+        return message.get_payload()
 
 
 class MailThread(models.AbstractModel):
@@ -67,7 +79,7 @@ class MailThread(models.AbstractModel):
             [('mail_id', '=', mail_mail.id)])
         metadata = {
             'bounce_type': 'hard_bounce',
-            'bounce_description': message.as_string(),
+            'bounce_description': message_get_contents(message),
         }
         mail_tracking.event_create('hard_bounce', metadata)
 
