@@ -53,7 +53,7 @@ class MailThread(models.AbstractModel):
                 mail_domain = [
                     ('id', '=', bounced_mail_id),
                     ('model', '=', bounced_model),
-                    ('bounced_res_id', '=', bounced_res_id),
+                    ('res_id', '=', bounced_res_id),
                 ]
                 mail_mail = self.env['mail.mail'].search(mail_domain, limit=1)
 
@@ -75,11 +75,13 @@ class MailThread(models.AbstractModel):
     def message_route(self, message, message_dict, model=None,
                       thread_id=None,
                       custom_values=None):
-        bounced_mail_mail = self.get_message_bounced_mail(self, message)
+        bounced_mail_mail = self.get_message_bounced_mail(message)
         if bounced_mail_mail:
-            self.save_bounced_mail_tracking(bounced_mail_mail)
+            self.save_bounced_mail_tracking(
+                bounced_mail_mail, message, message_dict)
 
         # continue regular processing
         return super(MailThread, self).message_route(message,
                                                      message_dict, model,
-                                                     thread_id, custom_values,)
+                                                     thread_id,
+                                                     custom_values, )
