@@ -34,3 +34,22 @@ class MailMail(models.Model):
         vals = self._tracking_email_prepare(partner, email)
         tracking_email = self.env['mail.tracking.email'].sudo().create(vals)
         return tracking_email.tracking_img_add(email)
+
+    # disable auto-delete of mail messages
+    @api.multi
+    def _postprocess_sent_message_v9(self, mail_sent=True):
+        """Perform any post-processing necessary after sending ``mail``
+        successfully, including deleting it completely along with its
+        attachment if the ``auto_delete`` flag of the mail was set.
+        Overridden by subclasses for extra post-processing behaviors.
+
+        :param browse_record mail: the mail that was just sent
+        :return: True
+        """
+        # Compat mode until v9
+        for mail in self:
+            self._postprocess_sent_message(mail, mail_sent=mail_sent)
+
+        # if mail_sent:
+        #    self.sudo().filtered(lambda self: self.auto_delete).unlink()
+        return True
